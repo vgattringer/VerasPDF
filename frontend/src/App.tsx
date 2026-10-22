@@ -10,6 +10,7 @@ import {
 import { Slider } from '@/components/ui/slider'
 import { PdfDropzone } from '@/components/pdf-dropzone'
 import { PdfFileList } from '@/components/pdf-file-list'
+import { useEstimatedSize } from '@/hooks/use-estimated-size'
 import { downloadBlob, mergePdfs } from '@/lib/api'
 import { formatSize } from '@/lib/format'
 
@@ -19,6 +20,15 @@ function App() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const totalSize = files.reduce((sum, file) => sum + file.size, 0)
+  const newSize = useEstimatedSize(files, imageQuality)
+  const newSizeLabel =
+    files.length < 2
+      ? 'add at least two files'
+      : newSize === undefined
+        ? 'calculating...'
+        : newSize === null
+          ? 'unavailable'
+          : formatSize(newSize)
 
   const merge = async () => {
     setBusy(true)
@@ -51,7 +61,7 @@ function App() {
               <span className="text-muted-foreground">
                 {imageQuality === 100
                   ? '100 (no size reduction)'
-                  : `${imageQuality} (smaller file)`}
+                  : `${imageQuality} - estimated new file size: ${newSizeLabel}`}
               </span>
             </div>
             <Slider
