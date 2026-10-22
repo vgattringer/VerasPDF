@@ -1,4 +1,4 @@
-# VerasPDF
+# VerasPDF - WORK IN PROGRESS...
 
 This is my first project, built entirely with [Claude Code](https://claude.com/claude-code) as my guide.
 
