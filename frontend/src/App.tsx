@@ -2,25 +2,29 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Card,
+  CardAction,
   CardContent,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Slider } from '@/components/ui/slider'
 import { PdfDropzone } from '@/components/pdf-dropzone'
 import { PdfFileList } from '@/components/pdf-file-list'
 import { downloadBlob, mergePdfs } from '@/lib/api'
+import { formatSize } from '@/lib/format'
 
 function App() {
   const [files, setFiles] = useState<File[]>([])
-  const [reduceSize, setReduceSize] = useState(false)
+  const [imageQuality, setImageQuality] = useState(100)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const totalSize = files.reduce((sum, file) => sum + file.size, 0)
 
   const merge = async () => {
     setBusy(true)
     setError(null)
     try {
-      downloadBlob(await mergePdfs(files, reduceSize), 'merged.pdf')
+      downloadBlob(await mergePdfs(files, imageQuality), 'merged.pdf')
       setFiles([])
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Merging failed.')
@@ -34,18 +38,31 @@ function App() {
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle>VerasPDF - merge PDFs</CardTitle>
+          <CardAction className="text-sm text-muted-foreground">
+            file size total = {formatSize(totalSize)}
+          </CardAction>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <PdfDropzone onFiles={(added) => setFiles((prev) => [...prev, ...added])} />
           {files.length > 0 && <PdfFileList files={files} onChange={setFiles} />}
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={reduceSize}
-              onChange={(e) => setReduceSize(e.target.checked)}
+          <div className="flex flex-col gap-2 text-sm">
+            <div className="flex justify-between">
+              <span>Image quality</span>
+              <span className="text-muted-foreground">
+                {imageQuality === 100
+                  ? '100 (no size reduction)'
+                  : `${imageQuality} (smaller file)`}
+              </span>
+            </div>
+            <Slider
+              aria-label="Image quality"
+              min={10}
+              max={100}
+              step={5}
+              value={[imageQuality]}
+              onValueChange={([value]) => setImageQuality(value)}
             />
-            Reduce file size
-          </label>
+          </div>
           {error &&<p className="text-sm text-destructive">{error}</p>}
           <Button disabled={files.length < 2 || busy} onClick={merge}>
             {busy ? 'Merging...' : 'Merge PDFs'}

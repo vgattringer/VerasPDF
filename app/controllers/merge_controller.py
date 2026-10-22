@@ -6,9 +6,11 @@ router = APIRouter(prefix="/api")
 
 
 @router.post("/merge")
-async def merge(files: list[UploadFile], reduce_size: bool = Form(False)) -> Response:
+async def merge(
+    files: list[UploadFile], image_quality: int = Form(100, ge=1, le=100)
+) -> Response:
     try:
-        merged = merge_pdfs([file.file for file in files], reduce_size)
+        merged = merge_pdfs([file.file for file in files], image_quality)
     except PdfMergeError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 

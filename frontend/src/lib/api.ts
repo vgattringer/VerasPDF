@@ -1,10 +1,10 @@
 export async function mergePdfs(
   files: File[],
-  reduceSize: boolean,
+  imageQuality: number,
 ): Promise<Blob> {
   const body = new FormData()
   files.forEach((file) => body.append('files', file))
-  body.append('reduce_size', String(reduceSize))
+  body.append('image_quality', String(imageQuality))
 
   const res = await fetch('/api/merge', { method: 'POST', body })
   if (!res.ok) {
