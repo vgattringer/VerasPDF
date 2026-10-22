@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Environment
 - Windows, Python 3.13, virtualenv at `.venv` (use `.venv\Scripts\python.exe`, not `bin/`).
 - Run: `.venv\Scripts\python.exe main.py`
-- Install deps: `.venv\Scripts\python.exe -m pip install pypdf ruff`
+- Install deps: `.venv\Scripts\python.exe -m pip install fastapi uvicorn python-multipart pypdf pillow ruff`
 - PDF handling uses `pypdf`.
 
 ## Style
