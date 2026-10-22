@@ -14,3 +14,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Notes
 - No tests exist yet; don't assume a test command.
+
+## Frontend
+- React + TypeScript + Tailwind v4 + shadcn/ui in `frontend/` (Vite). Backend is FastAPI in `app/`.
+- Dev: `.venv\Scripts\python.exe main.py` and `npm run dev` in `frontend/` (proxies `/api` to :8000).
+- Build: `npm run build` in `frontend/`; the backend serves `frontend/dist`.
+- Add shadcn components: `npx shadcn@latest add <name>` in `frontend/`.
