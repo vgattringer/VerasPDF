@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Style
 - Format and lint with `ruff format .` and `ruff check .`.
-- Match existing code: 4-space indent, single quotes, f-strings.
+- Match existing code: 4-space indent, double quotes (ruff default), f-strings.
 
 ## Notes
 - No tests exist yet; don't assume a test command.
