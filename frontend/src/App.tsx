@@ -12,6 +12,7 @@ import { downloadBlob, mergePdfs } from '@/lib/api'
 
 function App() {
   const [files, setFiles] = useState<File[]>([])
+  const [reduceSize, setReduceSize] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -19,7 +20,7 @@ function App() {
     setBusy(true)
     setError(null)
     try {
-      downloadBlob(await mergePdfs(files), 'merged.pdf')
+      downloadBlob(await mergePdfs(files, reduceSize), 'merged.pdf')
       setFiles([])
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Merging failed.')
@@ -37,7 +38,15 @@ function App() {
         <CardContent className="flex flex-col gap-4">
           <PdfDropzone onFiles={(added) => setFiles((prev) => [...prev, ...added])} />
           {files.length > 0 && <PdfFileList files={files} onChange={setFiles} />}
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={reduceSize}
+              onChange={(e) => setReduceSize(e.target.checked)}
+            />
+            Reduce file size
+          </label>
+          {error &&<p className="text-sm text-destructive">{error}</p>}
           <Button disabled={files.length < 2 || busy} onClick={merge}>
             {busy ? 'Merging...' : 'Merge PDFs'}
           </Button>
