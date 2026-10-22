@@ -6,7 +6,7 @@ This is my first project, built entirely with [Claude Code](https://claude.com/c
 
 Build a simple app where the user drags several PDFs into a designated area and gets them merged into one single PDF.
 
-The listed PDFs can be reordered before merging, and an optional "Reduce file size" setting shrinks the result by recompressing images.
+The listed PDFs can be reordered before merging, and an "Image quality" slider shrinks the result by recompressing images. The total size of the added files is shown in the card header.
 
 ## Learning goal
 
@@ -38,4 +38,4 @@ npm run dev     # or run the dev server, which proxies /api to the backend
 
 ## Status
 
-Working: drag-and-drop upload, reordering, merging into one PDF, and optional file size reduction.
+Working: drag-and-drop upload, reordering, merging into one PDF, and file size reduction via the image quality slider.
