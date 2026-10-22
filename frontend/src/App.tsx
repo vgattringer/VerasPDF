@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { PdfDropzone } from '@/components/pdf-dropzone'
+import { PdfFileList } from '@/components/pdf-file-list'
 import { downloadBlob, mergePdfs } from '@/lib/api'
 
 function App() {
@@ -35,23 +36,7 @@ function App() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <PdfDropzone onFiles={(added) => setFiles((prev) => [...prev, ...added])} />
-          {files.length > 0 && (
-            <ul className="flex flex-col gap-1 text-sm">
-              {files.map((file, i) => (
-                <li key={`${file.name}-${i}`} className="flex justify-between">
-                  <span className="truncate">
-                    {i + 1}. {file.name}
-                  </span>
-                  <button
-                    className="text-muted-foreground hover:text-foreground"
-                    onClick={() => setFiles(files.filter((_, j) => j !== i))}
-                  >
-                    remove
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+          {files.length > 0 && <PdfFileList files={files} onChange={setFiles} />}
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button disabled={files.length < 2 || busy} onClick={merge}>
             {busy ? 'Merging...' : 'Merge PDFs'}
