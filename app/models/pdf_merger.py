@@ -41,4 +41,4 @@ def _reduce_size(writer: PdfWriter, image_quality: int) -> None:
             except (PyPdfError, ValueError, OSError):
                 continue  # keep images that cannot be recompressed
         page.compress_content_streams()
-    writer.compress_identical_objects(remove_identicals=True, remove_orphans=True)
+    writer.compress_identical_objects(remove_duplicates=True, remove_unreferenced=True)
