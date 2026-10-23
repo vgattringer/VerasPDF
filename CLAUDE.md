@@ -5,15 +5,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Environment
 - Windows, Python 3.13, virtualenv at `.venv` (use `.venv\Scripts\python.exe`, not `bin/`).
 - Run: `.venv\Scripts\python.exe main.py`
-- Install deps: `.venv\Scripts\python.exe -m pip install fastapi uvicorn python-multipart pypdf pillow ruff`
+- Install deps: `.venv\Scripts\python.exe -m pip install -r requirements-dev.txt`
+- Test backend: `.venv\Scripts\python.exe -m pytest` (tests in `tests/`)
+- Test frontend: `npm test` in `frontend/` (Vitest)
 - PDF handling uses `pypdf`.
 
 ## Style
 - Format and lint with `ruff format .` and `ruff check .`.
 - Match existing code: 4-space indent, double quotes (ruff default), f-strings.
-
-## Notes
-- No tests exist yet; don't assume a test command.
 
 ## Frontend
 - React + TypeScript + Tailwind v4 + shadcn/ui in `frontend/` (Vite). Backend is FastAPI in `app/`.
