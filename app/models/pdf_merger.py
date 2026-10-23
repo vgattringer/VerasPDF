@@ -7,7 +7,9 @@ HTTP. The controller in :mod:`app.controllers.merge_controller` calls it.
 from io import BytesIO
 from typing import BinaryIO
 
+from PIL import Image
 from pypdf import PdfWriter
+from pypdf._page import ImageFile
 from pypdf.errors import PyPdfError
 
 
@@ -68,15 +70,39 @@ def _reduce_size(writer: PdfWriter, image_quality: int) -> None:
     The leading underscore is a convention meaning "internal helper, not part
     of the public interface".
 
+    An image is only re-encoded if that makes it smaller. Images that are
+    already compressed at or below ``image_quality`` stay as they are.
+
     Args:
         writer: The writer whose pages are recompressed.
-        image_quality: JPEG quality applied to every image.
+        image_quality: JPEG quality applied to images that benefit.
     """
     for page in writer.pages:
         for image in page.images:
             try:
-                image.replace(image.image, quality=image_quality)
+                if _jpeg_size(image.image, image_quality) >= _stored_size(image):
+                    continue  # re-encoding would not shrink this image
+                image.replace(image.image, quality=image_quality, optimize=True)
             except (PyPdfError, ValueError, OSError):
                 continue  # keep images that cannot be recompressed
         page.compress_content_streams()
     writer.compress_identical_objects(remove_duplicates=True, remove_unreferenced=True)
+
+
+def _jpeg_size(pil_image: Image.Image, image_quality: int) -> int:
+    """Return how many bytes ``pil_image`` takes as a JPEG at this quality.
+
+    Raises:
+        OSError: If the image mode cannot be saved as JPEG (palette, 1-bit,
+            transparency). Quality has no effect on those, so callers skip them.
+    """
+    buffer = BytesIO()
+    pil_image.save(buffer, "JPEG", quality=image_quality, optimize=True)
+    return buffer.tell()
+
+
+def _stored_size(image: ImageFile) -> int:
+    """Return how many bytes the image currently occupies inside the PDF."""
+    # pypdf has no public accessor for the still-encoded stream bytes;
+    # image.data is only that for JPEG/JPEG 2000 originals.
+    return len(image.indirect_reference.get_object()._data)
