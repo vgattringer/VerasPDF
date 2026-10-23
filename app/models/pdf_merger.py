@@ -48,7 +48,9 @@ def merge_pdfs(streams: list[BinaryIO], image_quality: int = 100) -> bytes:
     for index, stream in enumerate(streams, start=1):
         try:
             writer.append(stream)
-        except (PyPdfError, ValueError) as exc:
+        except Exception as exc:
+            # pypdf can fail on damaged files with more than PyPdfError
+            # (e.g. AssertionError, AttributeError), so catch broadly here.
             # "from exc" keeps the original error attached for debugging.
             raise PdfMergeError(f"File {index} is not a valid PDF.") from exc
 
