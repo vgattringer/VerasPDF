@@ -13,14 +13,23 @@ router = APIRouter(prefix="/api")
 
 
 def _merge(files: list[UploadFile], image_quality: int) -> bytes:
-    """Merge uploaded files, translating merge errors into HTTP 400.
+    """Hand the uploads to the model and return the merged PDF's bytes.
+
+    The merging itself happens in :func:`app.models.pdf_merger.merge_pdfs`
+    (the model, like a service method in Spring or .NET). This helper only
+    adapts between the two layers: it unwraps each upload into a plain file
+    object for the model, and converts the model's ``PdfMergeError`` into an
+    HTTP 400 so the client gets a proper error response.
+
+    The ``/merge`` and ``/estimate`` endpoints both use it so that this
+    conversion exists in one place only.
 
     Args:
         files: Uploaded PDFs, in merge order.
         image_quality: JPEG quality, 1-100.
 
     Returns:
-        The merged PDF bytes.
+        The merged PDF as bytes, exactly as returned by ``merge_pdfs``.
 
     Raises:
         HTTPException: With status 400 if the files cannot be merged.
