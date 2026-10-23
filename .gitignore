@@ -2,6 +2,7 @@
 __pycache__/
 .pytest_cache/
 .ruff_cache/
+docs/_build/
 CLAUDE.local.md
 .idea/
 node_modules/

@@ -8,6 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Install deps: `.venv\Scripts\python.exe -m pip install -r requirements-dev.txt`
 - Test backend: `.venv\Scripts\python.exe -m pytest` (tests in `tests/`)
 - Test frontend: `npm test` in `frontend/` (Vitest)
+- Docs (Sphinx): `.venv\Scripts\python.exe -m sphinx -b html docs docs\_build\html`, then open `docs\_build\html\index.html`. Use Google-style docstrings (Args/Returns/Raises).
 - PDF handling uses `pypdf`.
 
 ## Style
