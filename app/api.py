@@ -1,3 +1,5 @@
+"""FastAPI application: wires the routers together and serves the frontend."""
+
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -13,6 +15,7 @@ app.include_router(merge_controller.router)
 
 @app.get("/api/health")
 def health() -> dict[str, str]:
+    """Report that the server is running."""
     return {"status": "ok"}
 
 
