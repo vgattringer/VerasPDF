@@ -32,7 +32,7 @@ def _merge(files: list[UploadFile], image_quality: int) -> bytes:
 
 
 @router.post("/merge")
-async def merge(
+def merge(
     files: list[UploadFile], image_quality: int = Form(100, ge=1, le=100)
 ) -> Response:
     """Merge the uploaded PDFs and return the result as a download."""
@@ -44,7 +44,7 @@ async def merge(
 
 
 @router.post("/estimate")
-async def estimate(
+def estimate(
     files: list[UploadFile], image_quality: int = Form(100, ge=1, le=100)
 ) -> dict[str, int]:
     """Return the size in bytes the merged PDF would have.
