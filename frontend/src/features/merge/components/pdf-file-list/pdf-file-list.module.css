@@ -1,0 +1,33 @@
+@reference "../../../../index.css";
+
+.list {
+  @apply flex flex-col gap-1 text-sm;
+}
+
+.item {
+  @apply flex items-center gap-2 rounded-md border px-2 py-1;
+}
+
+.dragged {
+  @apply opacity-50;
+}
+
+.over {
+  @apply border-primary;
+}
+
+.grip {
+  @apply size-4 shrink-0 cursor-grab text-muted-foreground;
+}
+
+.name {
+  @apply min-w-0 flex-1 truncate;
+}
+
+.button {
+  @apply text-muted-foreground hover:text-foreground disabled:opacity-30;
+}
+
+.icon {
+  @apply size-4;
+}

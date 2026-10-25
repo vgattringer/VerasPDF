@@ -1,0 +1,17 @@
+@reference "./index.css";
+
+.page {
+  @apply flex min-h-svh items-center justify-center p-4;
+}
+
+.card {
+  @apply w-full max-w-lg;
+}
+
+.total {
+  @apply text-sm text-muted-foreground;
+}
+
+.content {
+  @apply flex flex-col gap-4;
+}

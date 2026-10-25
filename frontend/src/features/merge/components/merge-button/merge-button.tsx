@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { downloadBlob, mergePdfs } from '../../api'
+import styles from './merge-button.module.css'
+import { useMerge } from './use-merge'
 
 interface MergeButtonProps {
   files: File[]
@@ -9,26 +9,16 @@ interface MergeButtonProps {
 }
 
 export function MergeButton({ files, imageQuality, onMerged }: MergeButtonProps) {
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const merge = async () => {
-    setBusy(true)
-    setError(null)
-    try {
-      downloadBlob(await mergePdfs(files, imageQuality), 'merged.pdf')
-      onMerged()
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Merging failed.')
-    } finally {
-      setBusy(false)
-    }
-  }
+  const { busy, error, merge, disabled } = useMerge(
+    files,
+    imageQuality,
+    onMerged,
+  )
 
   return (
     <>
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      <Button disabled={files.length < 2 || busy} onClick={merge}>
+      {error && <p className={styles.error}>{error}</p>}
+      <Button disabled={disabled} onClick={merge}>
         {busy ? 'Merging...' : 'Merge PDFs'}
       </Button>
     </>

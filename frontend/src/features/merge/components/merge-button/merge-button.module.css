@@ -1,0 +1,5 @@
+@reference "../../../../index.css";
+
+.error {
+  @apply text-sm text-destructive;
+}

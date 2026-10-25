@@ -1,76 +1,62 @@
-import { useState } from 'react'
 import { ArrowDown, ArrowUp, GripVertical } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import styles from './pdf-file-list.module.css'
+import { usePdfFileList } from './use-pdf-file-list'
 
 interface PdfFileListProps {
   files: File[]
   onChange: (files: File[]) => void
 }
 
-function move<T>(items: T[], from: number, to: number): T[] {
-  if (from === to || to < 0 || to >= items.length) return items
-  const next = [...items]
-  next.splice(to, 0, next.splice(from, 1)[0])
-  return next
-}
-
 export function PdfFileList({ files, onChange }: PdfFileListProps) {
-  const [dragIndex, setDragIndex] = useState<number | null>(null)
-  const [overIndex, setOverIndex] = useState<number | null>(null)
-
-  const endDrag = () => {
-    setDragIndex(null)
-    setOverIndex(null)
-  }
+  const {
+    dragIndex,
+    overIndex,
+    onDragStart,
+    onDragOver,
+    onDrop,
+    onDragEnd,
+    moveBy,
+    remove,
+  } = usePdfFileList(files, onChange)
 
   return (
-    <ul className="flex flex-col gap-1 text-sm">
+    <ul className={styles.list}>
       {files.map((file, i) => (
         <li
           key={`${file.name}-${i}`}
           draggable
-          onDragStart={() => setDragIndex(i)}
-          onDragOver={(e) => {
-            if (dragIndex === null) return
-            e.preventDefault()
-            setOverIndex(i)
-          }}
-          onDrop={(e) => {
-            e.preventDefault()
-            if (dragIndex !== null) onChange(move(files, dragIndex, i))
-            endDrag()
-          }}
-          onDragEnd={endDrag}
+          onDragStart={() => onDragStart(i)}
+          onDragOver={(e) => onDragOver(e, i)}
+          onDrop={(e) => onDrop(e, i)}
+          onDragEnd={onDragEnd}
           className={cn(
-            'flex items-center gap-2 rounded-md border px-2 py-1',
-            dragIndex === i && 'opacity-50',
-            overIndex === i && dragIndex !== i && 'border-primary',
+            styles.item,
+            dragIndex === i && styles.dragged,
+            overIndex === i && dragIndex !== i && styles.over,
           )}
         >
-          <GripVertical className="size-4 shrink-0 cursor-grab text-muted-foreground" />
-          <span className="min-w-0 flex-1 truncate">
+          <GripVertical className={styles.grip} />
+          <span className={styles.name}>
             {i + 1}. {file.name}
           </span>
           <button
             aria-label={`Move ${file.name} up`}
             disabled={i === 0}
-            className="text-muted-foreground hover:text-foreground disabled:opacity-30"
-            onClick={() => onChange(move(files, i, i - 1))}
+            className={styles.button}
+            onClick={() => moveBy(i, -1)}
           >
-            <ArrowUp className="size-4" />
+            <ArrowUp className={styles.icon} />
           </button>
           <button
             aria-label={`Move ${file.name} down`}
             disabled={i === files.length - 1}
-            className="text-muted-foreground hover:text-foreground disabled:opacity-30"
-            onClick={() => onChange(move(files, i, i + 1))}
+            className={styles.button}
+            onClick={() => moveBy(i, 1)}
           >
-            <ArrowDown className="size-4" />
+            <ArrowDown className={styles.icon} />
           </button>
-          <button
-            className="text-muted-foreground hover:text-foreground"
-            onClick={() => onChange(files.filter((_, j) => j !== i))}
-          >
+          <button className={styles.button} onClick={() => remove(i)}>
             remove
           </button>
         </li>

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {
   Card,
   CardAction,
@@ -9,23 +8,31 @@ import {
 import { MergeButton, PdfDropzone, PdfFileList } from '@/features/merge'
 import { QualitySlider } from '@/features/size-reduction'
 import { formatSize } from '@/lib/format'
+import styles from './App.module.css'
+import { useApp } from './use-app'
 
 function App() {
-  const [files, setFiles] = useState<File[]>([])
-  const [imageQuality, setImageQuality] = useState(100)
-  const totalSize = files.reduce((sum, file) => sum + file.size, 0)
+  const {
+    files,
+    setFiles,
+    addFiles,
+    clearFiles,
+    imageQuality,
+    setImageQuality,
+    totalSize,
+  } = useApp()
 
   return (
-    <div className="flex min-h-svh items-center justify-center p-4">
-      <Card className="w-full max-w-lg">
+    <div className={styles.page}>
+      <Card className={styles.card}>
         <CardHeader>
           <CardTitle>VerasPDF - merge PDFs</CardTitle>
-          <CardAction className="text-sm text-muted-foreground">
+          <CardAction className={styles.total}>
             file size total = {formatSize(totalSize)}
           </CardAction>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <PdfDropzone onFiles={(added) => setFiles((prev) => [...prev, ...added])} />
+        <CardContent className={styles.content}>
+          <PdfDropzone onFiles={addFiles} />
           {files.length > 0 && <PdfFileList files={files} onChange={setFiles} />}
           <QualitySlider
             files={files}
@@ -35,7 +42,7 @@ function App() {
           <MergeButton
             files={files}
             imageQuality={imageQuality}
-            onMerged={() => setFiles([])}
+            onMerged={clearFiles}
           />
         </CardContent>
       </Card>

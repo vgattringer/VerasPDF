@@ -1,0 +1,9 @@
+@reference "../../../../index.css";
+
+.dropzone {
+  @apply flex h-40 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed text-sm text-muted-foreground transition-colors;
+}
+
+.dragging {
+  @apply border-primary bg-accent;
+}

@@ -1,0 +1,13 @@
+@reference "../../../../index.css";
+
+.root {
+  @apply flex flex-col gap-2 text-sm;
+}
+
+.header {
+  @apply flex justify-between;
+}
+
+.status {
+  @apply text-muted-foreground;
+}
