@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { estimateSize } from '@/lib/api'
+import { estimateSize } from '../../api'
 
 interface Estimate {
   files: File[]

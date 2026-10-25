@@ -1,8 +1,8 @@
 import { act, renderHook } from '@testing-library/react'
-import { estimateSize } from '@/lib/api'
+import { estimateSize } from '../../api'
 import { useEstimatedSize } from './use-estimated-size'
 
-vi.mock('@/lib/api', () => ({ estimateSize: vi.fn() }))
+vi.mock('../../api',() => ({ estimateSize: vi.fn() }))
 
 const estimateMock = vi.mocked(estimateSize)
 const makeFiles = () => [
