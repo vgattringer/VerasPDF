@@ -41,6 +41,35 @@ def test_merge_rejects_out_of_range_quality(client):
     assert response.status_code == 422
 
 
+def test_security_headers_are_set(client):
+    response = client.get("/api/health")
+    assert response.headers["x-content-type-options"] == "nosniff"
+    assert "frame-ancestors 'none'" in response.headers["content-security-policy"]
+
+
+def test_merge_rejects_too_many_files(client):
+    pdf = make_pdf()
+    response = client.post("/api/merge", files=_files(*[pdf] * 21))
+    assert response.status_code == 413
+
+
+def test_merge_rejects_oversized_file(client, monkeypatch):
+    monkeypatch.setattr("app.controllers.merge_controller.MAX_FILE_BYTES", 10)
+    response = client.post("/api/merge", files=_files(make_pdf(), make_pdf()))
+    assert response.status_code == 413
+
+
+def test_merge_rejects_non_pdf_content(client):
+    response = client.post("/api/estimate", files=_files(make_pdf(), b"GIF89a....."))
+    assert response.status_code == 400
+
+
+def test_oversized_body_is_rejected(client, monkeypatch):
+    monkeypatch.setattr("app.api.MAX_BODY_BYTES", 10)
+    response = client.post("/api/merge", files=_files(make_pdf(), make_pdf()))
+    assert response.status_code == 413
+
+
 def test_estimate_returns_size(client):
     response = client.post(
         "/api/estimate",

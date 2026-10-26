@@ -11,6 +11,35 @@ from app.models.pdf_merger import PdfMergeError, merge_pdfs
 
 router = APIRouter(prefix="/api")
 
+MAX_FILES = 20
+MAX_FILE_BYTES = 50 * 1024 * 1024
+MAX_TOTAL_BYTES = 200 * 1024 * 1024
+
+
+def _check_limits(files: list[UploadFile]) -> None:
+    """Reject uploads that are too many, too large, or not PDFs.
+
+    Args:
+        files: Uploaded PDFs.
+
+    Raises:
+        HTTPException: With status 413 if a size limit is exceeded, or 400 if
+            a file does not start with the PDF magic bytes.
+    """
+    if len(files) > MAX_FILES:
+        raise HTTPException(413, f"At most {MAX_FILES} files can be merged.")
+    total = 0
+    for file in files:
+        size = file.size or 0
+        total += size
+        if size > MAX_FILE_BYTES:
+            raise HTTPException(413, f"{file.filename} is too large.")
+        if file.file.read(5) != b"%PDF-":
+            raise HTTPException(400, f"{file.filename} is not a valid PDF.")
+        file.file.seek(0)
+    if total > MAX_TOTAL_BYTES:
+        raise HTTPException(413, "The files are too large in total.")
+
 
 def _merge(files: list[UploadFile], image_quality: int) -> bytes:
     """Hand the uploads to the model and return the merged PDF's bytes.
@@ -32,8 +61,10 @@ def _merge(files: list[UploadFile], image_quality: int) -> bytes:
         The merged PDF as bytes, exactly as returned by ``merge_pdfs``.
 
     Raises:
-        HTTPException: With status 400 if the files cannot be merged.
+        HTTPException: With status 400 if the files cannot be merged, or 413
+            if they exceed the size limits.
     """
+    _check_limits(files)
     try:
         return merge_pdfs([file.file for file in files], image_quality)
     except PdfMergeError as exc:
