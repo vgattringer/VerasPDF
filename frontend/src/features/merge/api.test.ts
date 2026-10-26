@@ -36,4 +36,32 @@ describe('mergePdfs', () => {
     })
     await expect(mergePdfs(files, 100)).rejects.toThrow('Merging failed.')
   })
+
+  it('ignores a detail that is not a string', async () => {
+    mockFetch({
+      ok: false,
+      status: 422,
+      json: async () => ({ detail: [{ msg: 'x' }] }),
+    })
+    await expect(mergePdfs(files, 100)).rejects.toThrow('Merging failed.')
+  })
+
+  it('ignores an overlong detail', async () => {
+    mockFetch({
+      ok: false,
+      status: 400,
+      json: async () => ({ detail: 'x'.repeat(500) }),
+    })
+    await expect(mergePdfs(files, 100)).rejects.toThrow('Merging failed.')
+  })
+
+  it('uses a generic message for server errors', async () => {
+    mockFetch({ ok: false, status: 502, json: async () => null })
+    await expect(mergePdfs(files, 100)).rejects.toThrow(/went wrong on the server/)
+  })
+
+  it('reports an unreachable server', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed')))
+    await expect(mergePdfs(files, 100)).rejects.toThrow(/Could not reach/)
+  })
 })
