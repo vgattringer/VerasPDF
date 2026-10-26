@@ -7,13 +7,19 @@ response.
 
 from fastapi import APIRouter, Form, HTTPException, Response, UploadFile
 
-from app.models.pdf_merger import PdfMergeError, merge_pdfs
+from app.models.pdf_merger import merge_pdfs
 
 router = APIRouter(prefix="/api")
 
 MAX_FILES = 20
 MAX_FILE_BYTES = 50 * 1024 * 1024
 MAX_TOTAL_BYTES = 200 * 1024 * 1024
+
+
+def _label(file: UploadFile) -> str:
+    """Return the client-supplied file name made safe to show in a message."""
+    name = "".join(ch for ch in file.filename or "" if ch.isprintable())
+    return name[:80] or "A file"
 
 
 def _check_limits(files: list[UploadFile]) -> None:
@@ -33,9 +39,9 @@ def _check_limits(files: list[UploadFile]) -> None:
         size = file.size or 0
         total += size
         if size > MAX_FILE_BYTES:
-            raise HTTPException(413, f"{file.filename} is too large.")
+            raise HTTPException(413, f"{_label(file)} is too large.")
         if file.file.read(5) != b"%PDF-":
-            raise HTTPException(400, f"{file.filename} is not a valid PDF.")
+            raise HTTPException(400, f"{_label(file)} is not a valid PDF.")
         file.file.seek(0)
     if total > MAX_TOTAL_BYTES:
         raise HTTPException(413, "The files are too large in total.")
@@ -46,12 +52,11 @@ def _merge(files: list[UploadFile], image_quality: int) -> bytes:
 
     The merging itself happens in :func:`app.models.pdf_merger.merge_pdfs`
     (the model, like a service method in Spring or .NET). This helper only
-    adapts between the two layers: it unwraps each upload into a plain file
-    object for the model, and converts the model's ``PdfMergeError`` into an
-    HTTP 400 so the client gets a proper error response.
+    adapts between the two layers: it checks the upload limits and unwraps
+    each upload into a plain file object for the model. A ``PdfMergeError``
+    is turned into an HTTP 400 by the handler in :mod:`app.errors`.
 
-    The ``/merge`` and ``/estimate`` endpoints both use it so that this
-    conversion exists in one place only.
+    The ``/merge`` and ``/estimate`` endpoints both use it.
 
     Args:
         files: Uploaded PDFs, in merge order.
@@ -61,14 +66,12 @@ def _merge(files: list[UploadFile], image_quality: int) -> bytes:
         The merged PDF as bytes, exactly as returned by ``merge_pdfs``.
 
     Raises:
-        HTTPException: With status 400 if the files cannot be merged, or 413
-            if they exceed the size limits.
+        HTTPException: With status 413 if the files exceed the size limits,
+            or 400 if one is not a PDF.
+        PdfMergeError: If the files cannot be merged.
     """
     _check_limits(files)
-    try:
-        return merge_pdfs([file.file for file in files], image_quality)
-    except PdfMergeError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return merge_pdfs([file.file for file in files], image_quality)
 
 
 @router.post("/merge")

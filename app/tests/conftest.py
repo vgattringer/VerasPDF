@@ -9,7 +9,7 @@ from app.api import app
 
 @pytest.fixture
 def client() -> TestClient:
-    return TestClient(app)
+    return TestClient(app, raise_server_exceptions=False)
 
 
 def make_pdf(pages: int = 1) -> bytes:

@@ -70,6 +70,48 @@ def test_oversized_body_is_rejected(client, monkeypatch):
     assert response.status_code == 413
 
 
+def test_unexpected_error_is_generic_and_has_headers(client, monkeypatch):
+    def boom(*args, **kwargs):
+        raise RuntimeError("secret internal detail")
+
+    monkeypatch.setattr("app.controllers.merge_controller.merge_pdfs", boom)
+    response = client.post("/api/merge", files=_files(make_pdf(), make_pdf()))
+    assert response.status_code == 500
+    assert "secret" not in response.text
+    assert response.json() == {"detail": "Something went wrong on the server."}
+    assert response.headers["x-content-type-options"] == "nosniff"
+
+
+def test_validation_error_does_not_echo_input(client):
+    response = client.post(
+        "/api/merge",
+        files=_files(make_pdf(), make_pdf()),
+        data={"image_quality": "secret-value"},
+    )
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Invalid request."}
+
+
+def test_unknown_route_keeps_security_headers(client):
+    response = client.get("/api/nope")
+    assert response.status_code == 404
+    assert response.headers["x-frame-options"] == "DENY"
+
+
+def test_filename_in_message_is_sanitized(client):
+    name = "a\nb" + "x" * 200 + ".pdf"
+    response = client.post(
+        "/api/merge",
+        files=[
+            ("files", (name, b"GIF89a....", "application/pdf")),
+            ("files", ("b.pdf", make_pdf(), "application/pdf")),
+        ],
+    )
+    detail = response.json()["detail"]
+    assert response.status_code == 400
+    assert "\n" not in detail and len(detail) < 120
+
+
 def test_estimate_returns_size(client):
     response = client.post(
         "/api/estimate",
