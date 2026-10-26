@@ -8,3 +8,4 @@ CLAUDE.local.md
 node_modules/
 frontend/dist/
 VerasPDF.bat
+security-notes.md
