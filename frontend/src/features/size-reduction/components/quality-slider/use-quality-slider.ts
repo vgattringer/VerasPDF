@@ -13,6 +13,6 @@ export function useQualitySlider(files: File[], value: number) {
           : formatSize(newSize)
 
   return value === 100
-    ? '100 (no size reduction)'
-    : `${value} - estimated new file size: ${newSizeLabel}`
+    ? '(no size reduction yet)'
+    : `Estimated new file size: ${newSizeLabel}`
 }
